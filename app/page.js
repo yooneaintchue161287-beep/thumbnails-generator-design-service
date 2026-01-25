@@ -37,9 +37,17 @@ export default function Home() {
           <img src={`/styles/${style}.jpg`} />
           <p style={{ opacity: 0.7 }}>{title}</p>
 
-          <button style={{ marginTop: 10 }}>
-            Unlock & Download ($5)
-          </button>
+          <button
+  style={{ marginTop: 10 }}
+  onClick={async () => {
+    const res = await fetch("/api/pay", { method: "POST" });
+    const data = await res.json();
+    window.location.href = data.data.attributes.checkout_url;
+  }}
+>
+  Unlock & Download (₱5)
+</button>
+
         </div>
       )}
     </div>
