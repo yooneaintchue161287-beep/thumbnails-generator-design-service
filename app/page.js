@@ -1,3 +1,6 @@
+const [image, setImage] = useState(null);
+const [loading, setLoading] = useState(false);
+
 "use client";
 import { useState } from "react";
 
@@ -26,30 +29,37 @@ export default function Home() {
           <option value="beast">MrBeast Style</option>
         </select>
 
-        <button onClick={() => setGenerated(true)} style={{ marginTop: 12 }}>
-          Generate Thumbnail
-        </button>
+        <button
+  onClick={async () => {
+    setLoading(true);
+    const res = await fetch("/api/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title, style }),
+    });
+    const data = await res.json();
+    setImage(data.data[0].url);
+    setLoading(false);
+  }}
+  style={{ marginTop: 12 }}
+>
+  {loading ? "Generating..." : "Generate Thumbnail"}
+</button>
       </div>
 
-      {generated && (
-        <div className="card">
-          <p>Preview (Watermarked)</p>
-          <img src={`/styles/${style}.jpg`} />
-          <p style={{ opacity: 0.7 }}>{title}</p>
-
-          <button
-  style={{ marginTop: 10 }}
-  onClick={async () => {
-    const res = await fetch("/api/pay", { method: "POST" });
-    const data = await res.json();
-    window.location.href = data.data.attributes.checkout_url;
-  }}
->
-  Unlock & Download (₱5)
-</button>
-
-        </div>
-      )}
-    </div>
-  );
-}
+      {image && (
+  <div className="card">
+    <p>AI Preview</p>
+    <img src={image} />
+    <button
+      style={{ marginTop: 10 }}
+      onClick={async () => {
+        const res = await fetch("/api/pay", { method: "POST" });
+        const data = await res.json();
+        window.location.href = data.data.attributes.checkout_url;
+      }}
+    >
+      Unlock & Download (₱5)
+    </button>
+  </div>
+)}
