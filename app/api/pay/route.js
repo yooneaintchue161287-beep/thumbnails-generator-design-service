@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+export const runtime = "nodejs";
+
 export async function POST() {
   const res = await fetch("https://api.paymongo.com/v1/links", {
     method: "POST",
