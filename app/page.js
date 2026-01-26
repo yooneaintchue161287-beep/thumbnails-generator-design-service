@@ -9,7 +9,7 @@ export default function Home() {
   const [generated, setGenerated] = useState(false);
   const canvasRef = useRef(null);
 
-  // Draw preview on canvas
+  // Draw preview
   const drawPreview = () => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
@@ -21,8 +21,8 @@ export default function Home() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(base, 0, 0, canvas.width, canvas.height);
 
-      // Draw uploaded user image if exists
       if (uploadedImage) {
+        // Load user photo and draw AFTER it loads
         const userImg = new Image();
         userImg.src = uploadedImage;
         userImg.onload = () => {
@@ -36,7 +36,7 @@ export default function Home() {
   };
 
   const drawTextAndWatermark = (ctx) => {
-    // Draw title text
+    // Draw title
     ctx.fillStyle = "white";
     ctx.strokeStyle = "black";
     ctx.lineWidth = 3;
@@ -45,7 +45,7 @@ export default function Home() {
     ctx.fillText(title, ctx.canvas.width / 2, ctx.canvas.height - 50);
     ctx.strokeText(title, ctx.canvas.width / 2, ctx.canvas.height - 50);
 
-    // Draw watermark (always shown before payment)
+    // Draw watermark
     ctx.fillStyle = "rgba(255,255,255,0.7)";
     ctx.font = "bold 24px Arial";
     ctx.fillText("PREVIEW • ThumbnailBoost", ctx.canvas.width / 2, 30);
@@ -57,7 +57,7 @@ export default function Home() {
       return;
     }
     setGenerated(true);
-    setTimeout(drawPreview, 100); // slight delay for images to load
+    drawPreview();
   };
 
   const handleUpload = (e) => {
