@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 export default function Home() {
   const [title, setTitle] = useState("");
@@ -9,20 +9,21 @@ export default function Home() {
   const [generated, setGenerated] = useState(false);
   const canvasRef = useRef(null);
 
-  // Draw preview
-  const drawPreview = () => {
+  // Effect: redraw canvas whenever title, style, or uploaded image changes after generating
+  useEffect(() => {
+    if (!generated) return;
+
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
 
-    // Load base template
     const base = new Image();
     base.src = `/styles/${style}.jpg`;
+
     base.onload = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(base, 0, 0, canvas.width, canvas.height);
 
       if (uploadedImage) {
-        // Load user photo and draw AFTER it loads
         const userImg = new Image();
         userImg.src = uploadedImage;
         userImg.onload = () => {
@@ -33,7 +34,7 @@ export default function Home() {
         drawTextAndWatermark(ctx);
       }
     };
-  };
+  }, [generated, uploadedImage, title, style]);
 
   const drawTextAndWatermark = (ctx) => {
     // Draw title
@@ -45,7 +46,7 @@ export default function Home() {
     ctx.fillText(title, ctx.canvas.width / 2, ctx.canvas.height - 50);
     ctx.strokeText(title, ctx.canvas.width / 2, ctx.canvas.height - 50);
 
-    // Draw watermark
+    // Watermark
     ctx.fillStyle = "rgba(255,255,255,0.7)";
     ctx.font = "bold 24px Arial";
     ctx.fillText("PREVIEW • ThumbnailBoost", ctx.canvas.width / 2, 30);
@@ -57,7 +58,6 @@ export default function Home() {
       return;
     }
     setGenerated(true);
-    drawPreview();
   };
 
   const handleUpload = (e) => {
