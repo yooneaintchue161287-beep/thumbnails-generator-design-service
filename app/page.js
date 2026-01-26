@@ -3,65 +3,14 @@
 import { useState } from "react";
 
 export default function Home() {
-  const [style, setStyle] = useState("gaming");
   const [title, setTitle] = useState("");
-  const [image, setImage] = useState(null);
-  const [loading, setLoading] = useState(false);
-
-  async function generateThumbnail() {
-    if (!title) {
-      alert("Please enter a video title");
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setImage(null);
-
-      const res = await fetch("/api/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, style }),
-      });
-
-      if (!res.ok) {
-        throw new Error("AI generation failed");
-      }
-
-      const data = await res.json();
-      console.log("AI RESPONSE:", data);
-
-      setImage(data.data[0].url);
-    } catch (err) {
-      console.error(err);
-      alert("AI thumbnail generation failed. Check console.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function unlockAndPay() {
-    try {
-      const res = await fetch("/api/pay", { method: "POST" });
-
-      if (!res.ok) {
-        throw new Error("Payment link failed");
-      }
-
-      const data = await res.json();
-      console.log("PAY RESPONSE:", data);
-
-      window.location.href = data.data.attributes.checkout_url;
-    } catch (err) {
-      console.error(err);
-      alert("Payment failed. Check console.");
-    }
-  }
+  const [style, setStyle] = useState("gaming");
+  const [generated, setGenerated] = useState(false);
 
   return (
     <div className="container">
       <h1>🔥 ThumbnailBoost</h1>
-      <p>Generate high-CTR YouTube thumbnails with AI</p>
+      <p>Create high-CTR YouTube thumbnails (no AI needed)</p>
 
       <div className="card">
         <label>Video Title</label>
@@ -79,17 +28,58 @@ export default function Home() {
           <option value="beast">MrBeast Style</option>
         </select>
 
-        <button onClick={generateThumbnail} style={{ marginTop: 14 }}>
-          {loading ? "Generating..." : "Generate Thumbnail"}
+        <button
+          style={{ marginTop: 14 }}
+          onClick={() => {
+            if (!title) {
+              alert("Please enter a title");
+              return;
+            }
+            setGenerated(true);
+          }}
+        >
+          Generate Thumbnail
         </button>
       </div>
 
-      {image && (
+      {generated && (
         <div className="card">
-          <p>AI Thumbnail Preview</p>
-          <img src={image} alt="AI Thumbnail" />
+          <p>Preview</p>
 
-          <button onClick={unlockAndPay} style={{ marginTop: 12 }}>
+          <div style={{ position: "relative" }}>
+            <img src={`/styles/${style}.jpg`} />
+
+            <div
+              style={{
+                position: "absolute",
+                bottom: "10%",
+                left: "5%",
+                right: "5%",
+                color: "white",
+                fontSize: "24px",
+                fontWeight: "bold",
+                textShadow: "2px 2px 6px black",
+                textAlign: "center",
+              }}
+            >
+              {title}
+            </div>
+          </div>
+
+          <button
+            style={{ marginTop: 12 }}
+            onClick={async () => {
+              try {
+                const res = await fetch("/api/pay", { method: "POST" });
+                const data = await res.json();
+
+                window.location.href =
+                  data.data.attributes.checkout_url;
+              } catch (err) {
+                alert("Payment error");
+              }
+            }}
+          >
             Unlock & Download (₱5)
           </button>
         </div>
