@@ -116,11 +116,17 @@ export default function Home() {
         <div className="card">
           <p>Preview (watermarked)</p>
           <canvas
-            ref={canvasRef}
-            width={800}
-            height={450}
-            style={{ width: "100%", border: "1px solid #ccc" }}
-          />
+  ref={canvasRef}
+  width={800}
+  height={450}
+  style={{
+    width: "100%",
+    height: "300px",
+    background: "red",
+    border: "4px solid yellow",
+  }}
+/>
+
           <button style={{ marginTop: 14 }} onClick={handlePayment}>
             Unlock & Download (₱5)
           </button>
