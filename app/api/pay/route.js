@@ -25,8 +25,8 @@ export async function POST() {
               },
             ],
             payment_method_types: ["gcash", "paymaya", "card"],
-            success_url: "https://https://thumbnails-generator-design-service.vercel.app/success",
-            cancel_url: "https://https://thumbnails-generator-design-service.vercel.app",
+            success_url: "https://your-site.vercel.app/success",
+            cancel_url: "https://your-site.vercel.app",
           },
         },
       }),
@@ -40,9 +40,6 @@ export async function POST() {
 
     return new Response(JSON.stringify(data), { status: 200 });
   } catch (err) {
-    return new Response(
-      JSON.stringify({ error: "Payment failed" }),
-      { status: 500 }
-    );
+    return new Response(JSON.stringify({ error: "Payment failed" }), { status: 500 });
   }
 }
