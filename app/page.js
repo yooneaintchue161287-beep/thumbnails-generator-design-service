@@ -5,76 +5,80 @@ import { useState, useRef, useEffect } from "react";
 export default function Home() {
   const [title, setTitle] = useState("");
   const [style, setStyle] = useState("gaming");
-  const [uploadedImage, setUploadedImage] = useState(null);
+  const [faceImage, setFaceImage] = useState(null); // base64
   const [generated, setGenerated] = useState(false);
   const canvasRef = useRef(null);
 
-  // Effect: redraw canvas whenever title, style, or uploaded image changes after generating
+  // Draw thumbnail whenever something changes
   useEffect(() => {
     if (!generated) return;
 
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
 
-    const base = new Image();
-    base.src = `/styles/${style}.jpg`;
+    const bg = new Image();
+    bg.src = `/styles/${style}.jpg`;
 
-    base.onload = () => {
+    bg.onload = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(base, 0, 0, canvas.width, canvas.height);
+      ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
 
-      if (uploadedImage) {
-        const userImg = new Image();
-        userImg.src = uploadedImage;
-        userImg.onload = () => {
-          ctx.drawImage(userImg, canvas.width - 250, 10, 240, 240);
-          drawTextAndWatermark(ctx);
+      if (faceImage) {
+        const face = new Image();
+        face.src = faceImage;
+        face.onload = () => {
+          ctx.drawImage(face, canvas.width - 260, 20, 240, 240);
+          drawText(ctx);
         };
       } else {
-        drawTextAndWatermark(ctx);
+        drawText(ctx);
       }
     };
-  }, [generated, uploadedImage, title, style]);
+  }, [generated, style, title, faceImage]);
 
-  const drawTextAndWatermark = (ctx) => {
-    // Draw title
+  const drawText = (ctx) => {
+    // Title
     ctx.fillStyle = "white";
     ctx.strokeStyle = "black";
-    ctx.lineWidth = 3;
-    ctx.font = "bold 36px Arial";
+    ctx.lineWidth = 4;
+    ctx.font = "bold 38px Arial";
     ctx.textAlign = "center";
-    ctx.fillText(title, ctx.canvas.width / 2, ctx.canvas.height - 50);
-    ctx.strokeText(title, ctx.canvas.width / 2, ctx.canvas.height - 50);
+    ctx.fillText(title, ctx.canvas.width / 2, ctx.canvas.height - 40);
+    ctx.strokeText(title, ctx.canvas.width / 2, ctx.canvas.height - 40);
 
     // Watermark
-    ctx.fillStyle = "rgba(255,255,255,0.7)";
-    ctx.font = "bold 24px Arial";
-    ctx.fillText("PREVIEW • ThumbnailBoost", ctx.canvas.width / 2, 30);
+    ctx.fillStyle = "rgba(255,255,255,0.75)";
+    ctx.font = "bold 22px Arial";
+    ctx.fillText("PREVIEW • ThumbnailBoost", ctx.canvas.width / 2, 32);
   };
 
   const handleGenerate = () => {
     if (!title) {
-      alert("Enter a title");
+      alert("Please enter a title");
       return;
     }
     setGenerated(true);
   };
 
+  // ✅ FILE READER (CRITICAL FIX)
   const handleUpload = (e) => {
-    if (!e.target.files || e.target.files.length === 0) return;
-    const file = e.target.files[0];
-    const url = URL.createObjectURL(file);
-    setUploadedImage(url);
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setFaceImage(reader.result); // base64
+    };
+    reader.readAsDataURL(file);
   };
 
   const handlePayment = async () => {
     try {
       const res = await fetch("/api/pay", { method: "POST" });
       const data = await res.json();
-      if (!data?.data?.attributes?.checkout_url) throw new Error();
       window.location.href = data.data.attributes.checkout_url;
     } catch (err) {
-      alert("Payment failed. Check console.");
+      alert("Payment failed");
       console.error(err);
     }
   };
@@ -100,10 +104,10 @@ export default function Home() {
           <option value="beast">MrBeast Style</option>
         </select>
 
-        <label style={{ marginTop: 10 }}>Upload your photo (optional)</label>
+        <label style={{ marginTop: 10 }}>Upload Face Photo</label>
         <input type="file" accept="image/*" onChange={handleUpload} />
 
-        <button style={{ marginTop: 12 }} onClick={handleGenerate}>
+        <button style={{ marginTop: 14 }} onClick={handleGenerate}>
           Generate Preview
         </button>
       </div>
@@ -117,7 +121,7 @@ export default function Home() {
             height={450}
             style={{ width: "100%", border: "1px solid #ccc" }}
           />
-          <button style={{ marginTop: 12 }} onClick={handlePayment}>
+          <button style={{ marginTop: 14 }} onClick={handlePayment}>
             Unlock & Download (₱5)
           </button>
         </div>
