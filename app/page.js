@@ -106,6 +106,12 @@ export default function Home() {
 
         <label style={{ marginTop: 10 }}>Upload Face Photo</label>
         <input type="file" accept="image/*" onChange={handleUpload} />
+  {faceImage && (
+  <img
+    src={faceImage}
+    style={{ width: "200px", border: "2px solid green" }}
+  />
+)}
 
         <button style={{ marginTop: 14 }} onClick={handleGenerate}>
           Generate Preview
